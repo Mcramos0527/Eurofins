@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Day One — LIMS BA Field Training</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #10171a;
+    --panel: #182226;
+    --panel-2: #1e2a2f;
+    --line: #2b393f;
+    --amber: #e8a33d;
+    --teal: #4fa9a3;
+    --danger: #d9534f;
+    --text: #eceff0;
+    --text-dim: #8fa0a3;
+    --mono: 'IBM Plex Mono', monospace;
+    --display: 'Oswald', sans-serif;
+    --body: 'Inter', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:var(--body); -webkit-font-smoothing:antialiased;
+  }
+  .app{ display:flex; min-height:100vh; }
+
+  .rail{
+    width:280px; flex-shrink:0; background:var(--panel);
+    border-right:1px solid var(--line); padding:20px 0 20px 0;
+    display:flex; flex-direction:column;
+  }
+  .rail-head{ padding:0 20px 18px 20px; border-bottom:1px solid var(--line); margin-bottom:8px;}
+  .rail-head .kicker{ font-family:var(--mono); font-size:10.5px; letter-spacing:.14em; color:var(--amber); text-transform:uppercase;}
+  .rail-head h1{ font-family:var(--display); font-size:19px; font-weight:600; margin:6px 0 4px; line-height:1.15;}
+  .rail-head p{ font-size:11.5px; color:var(--text-dim); margin:0; line-height:1.5;}
+
+  .rail-scroll{ overflow-y:auto; flex:1; }
+  .cat-head{
+    font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--text-dim); padding:16px 20px 6px; border-top:1px solid var(--line); margin-top:6px;
+  }
+  .cat-head:first-child{ border-top:none; margin-top:0; }
+
+  .stage-btn{
+    display:flex; align-items:center; gap:10px; width:100%; text-align:left;
+    background:none; border:none; color:var(--text); cursor:pointer;
+    padding:9px 20px; font-family:var(--body); font-size:12.5px; position:relative;
+    border-left:3px solid transparent;
+  }
+  .stage-btn:hover{ background:var(--panel-2); }
+  .stage-btn.active{ background:var(--panel-2); border-left:3px solid var(--amber); }
+  .stage-num{
+    font-family:var(--mono); font-size:10.5px; color:var(--text-dim); width:20px; flex-shrink:0;
+  }
+  .stage-btn.active .stage-num{ color:var(--amber); }
+  .stage-label{ flex:1; line-height:1.3; }
+  .stage-check{
+    font-family:var(--mono); font-size:10px; color:var(--teal); flex-shrink:0; opacity:0;
+  }
+  .stage-check.done{ opacity:1; }
+
+  .rail-foot{ padding:16px 20px 0; border-top:1px solid var(--line);}
+  .progress-track{ height:5px; background:var(--line); border-radius:3px; overflow:hidden; margin-bottom:6px;}
+  .progress-fill{ height:100%; background:var(--amber); width:0%; transition:width .3s;}
+  .progress-text{ font-family:var(--mono); font-size:10.5px; color:var(--text-dim);}
+  .reset-btn{
+    margin-top:12px; background:none; border:1px solid var(--line); color:var(--text-dim);
+    font-family:var(--mono); font-size:10px; padding:6px 10px; border-radius:4px; cursor:pointer; width:100%;
+  }
+  .reset-btn:hover{ border-color:var(--danger); color:var(--danger); }
+
+  .main{ flex:1; padding:36px 48px 80px; max-width:840px; }
+  .label-card{
+    display:inline-flex; align-items:center; gap:10px;
+    font-family:var(--mono); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--amber); border:1px solid var(--line); padding:5px 10px 5px 0; border-radius:2px; margin-bottom:14px;
+  }
+  .label-card .tab-notch{ background:var(--amber); color:#10171a; padding:5px 8px; font-weight:600; }
+  .cat-pill{ font-family:var(--mono); font-size:10px; color:var(--teal); text-transform:uppercase; letter-spacing:.1em; margin-bottom:8px; }
+  .stage-title{ font-family:var(--display); font-size:29px; font-weight:600; margin:0 0 6px; line-height:1.2;}
+  .stage-sub{ color:var(--text-dim); font-size:13.5px; margin:0 0 26px; }
+
+  .mentor{
+    background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--teal);
+    border-radius:4px; padding:20px 22px; margin-bottom:22px;
+  }
+  .mentor .who{ font-family:var(--mono); font-size:10.5px; color:var(--teal); text-transform:uppercase; letter-spacing:.1em; margin-bottom:10px; }
+  .mentor p{ margin:0 0 12px; font-size:14px; line-height:1.7; color:var(--text); }
+  .mentor p:last-child{ margin-bottom:0; }
+  .mentor .term{ font-family:var(--mono); color:var(--amber); font-size:12.5px; }
+
+  .panel-card{
+    background:var(--panel-2); border:1px solid var(--line); border-radius:4px; padding:20px 22px; margin-bottom:20px;
+  }
+  .panel-card h3{ font-family:var(--display); font-size:16px; font-weight:500; margin:0 0 12px; letter-spacing:.02em; }
+  .panel-card .note-block{ font-family:var(--mono); font-size:12px; color:var(--text-dim); background:var(--bg); border:1px solid var(--line); border-radius:3px; padding:12px 14px; line-height:1.6; white-space:pre-wrap; margin-bottom:14px;}
+
+  textarea{
+    width:100%; min-height:120px; background:var(--bg); border:1px solid var(--line); border-radius:4px;
+    color:var(--text); font-family:var(--body); font-size:13.5px; line-height:1.6; padding:14px; resize:vertical;
+  }
+  textarea:focus{ outline:none; border-color:var(--amber); }
+
+  .btn-row{ display:flex; gap:10px; margin-top:14px; flex-wrap:wrap; }
+  button.act{
+    font-family:var(--mono); font-size:11.5px; letter-spacing:.05em; text-transform:uppercase;
+    padding:9px 16px; border-radius:3px; cursor:pointer; border:1px solid var(--line); background:transparent; color:var(--text);
+  }
+  button.act:hover{ border-color:var(--amber); color:var(--amber); }
+  button.act.primary{ background:var(--amber); color:#10171a; border-color:var(--amber); font-weight:600;}
+  button.act.primary:hover{ background:#f0b25c; color:#10171a;}
+  button.act.done-btn{ border-color:var(--teal); color:var(--teal); }
+
+  .reveal{ margin-top:16px; border-top:1px dashed var(--line); padding-top:16px; display:none; }
+  .reveal.show{ display:block; }
+  .reveal .who{ font-family:var(--mono); font-size:10.5px; color:var(--amber); text-transform:uppercase; letter-spacing:.1em; margin-bottom:10px;}
+  .reveal-body{ font-size:13.5px; line-height:1.75; color:var(--text); }
+  .reveal-body p{ margin:0 0 10px;}
+  .reveal-body ul, .reveal-body ol{ margin:0 0 10px; padding-left:20px; }
+  .reveal-body li{ margin-bottom:5px; }
+  .reveal-body .code{ font-family:var(--mono); font-size:12.5px; background:var(--bg); border:1px solid var(--line); border-radius:3px; padding:12px 14px; display:block; white-space:pre-wrap; color:var(--text-dim); margin:8px 0;}
+  .reveal-body .code .kw{ color:var(--teal); }
+  .reveal-body .code .flag{ color:var(--amber); }
+  .reveal-body table{ width:100%; border-collapse:collapse; font-size:12.5px; margin:8px 0 12px;}
+  .reveal-body th, .reveal-body td{ border:1px solid var(--line); padding:7px 9px; text-align:left;}
+  .reveal-body th{ font-family:var(--mono); font-size:10.5px; text-transform:uppercase; color:var(--text-dim); letter-spacing:.05em;}
+
+  .status-stamp{
+    display:inline-flex; align-items:center; gap:6px; font-family:var(--mono); font-size:11px;
+    color:var(--teal); border:1px solid var(--teal); padding:4px 10px; border-radius:3px; margin-bottom:18px;
+  }
+  .nav-foot{ display:flex; justify-content:space-between; margin-top:36px; padding-top:20px; border-top:1px solid var(--line); }
+
+  ::-webkit-scrollbar{ width:8px; }
+  ::-webkit-scrollbar-thumb{ background:var(--line); border-radius:4px; }
+
+  @media (max-width: 760px){
+    .app{ flex-direction:column; }
+    .rail{ width:100%; max-height:60vh; }
+    .main{ padding:24px 20px 60px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="rail">
+    <div class="rail-head">
+      <div class="kicker">Field Training — Full Cycle</div>
+      <h1>Day One: LIMS BA</h1>
+      <p>Case file: <b style="color:var(--amber)">Damaged Sample Intake Alert</b> — Dublin / Madrid / Lisbon. Every activity a BA runs on this project, start to finish.</p>
+    </div>
+    <div class="rail-scroll" id="stageList"></div>
+    <div class="rail-foot">
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-text" id="progressText">0 / 0 stages complete</div>
+      <button class="reset-btn" id="resetBtn">RESET TRAINING PROGRESS</button>
+    </div>
+  </div>
+
+  <div class="main" id="main"></div>
+</div>
+
+<script>
+/* ================= DATA ================= */
+const STAGES = [
+
+/* ---------- CATEGORY A: INTAKE & DISCOVERY ---------- */
+{ cat:"A . Intake & Discovery", id:"intake", label:"Ticket Intake & Triage", tag:"Day 1 - 08:45",
+  title:"The Ticket Lands", sub:"Before you talk to anyone, learn to read a request the way a BA reads it - as a gap, not a task.",
+  mentor:[
+   "A ticket dropped overnight: <span class='term'>\"Damaged samples not being flagged consistently.\"</span> Forwarded by the PM with one line: \"scope this for next sprint?\" Nobody wrote you a spec - a vague ticket is an invitation to go find out what's happening, not a to-do item.",
+   "Before I let you near a stakeholder, give me your discovery prep: questions about the business gap, not the software."
+  ],
+  task:"Write 5 questions you'd want answered before your first discovery call with the Madrid QC lead. Don't ask about screens yet.",
+  placeholder:"1. Who first noticed this and how often does it happen?\n2. ...",
+  reveal:"<ol><li><b>Who reported it, and who else is affected?</b> Scope tells you if it's local or systemic.</li><li><b>What's the current workaround?</b> The real process, not the documented one.</li><li><b>How often, and what's the cost of getting it wrong?</b> Frequency times severity decides urgency.</li><li><b>What systems does this touch today?</b> Accessioning only, or does it cascade into workflow and reporting?</li><li><b>Is there a regulatory angle?</b> Sample condition brushes up against ISO 15189 and ALCOA+ data integrity.</li></ol><p><b>Why this matters:</b> none of these are \"what button do we add.\" You gather the shape of the problem before you solution it.</p>"
+},
+{ cat:"A . Intake & Discovery", id:"discovery", label:"Stakeholder Interview & As-Is Mapping", tag:"Day 1 - 10:00",
+  title:"Shadowing, Then the Madrid Call", sub:"You watch the real process before you write anything. Then you turn messy field notes into a usable document.",
+  mentor:[
+   "Twenty minutes shadowing the Dublin accessioning bench before any call. A tech logs a sample with a crushed box lid, writes a sticky note, moves on - the sticky note is the whole problem: it lives outside the system, no audit trail.",
+   "Here are the raw notes from the shadow session plus the Madrid call. Turn this into a clean 5-6 step As-Is."
+  ],
+  task:"Raw notes: damaged samples happen 2-3x per week per site. tech writes sticky note, sample still gets 'received' status either way. no 'damaged' flag exists. Madrid confirms same workaround - sometimes note gets lost, sample goes to testing, result comes back weird, THEN someone realizes it was damaged. no audit trail. Lisbon not contacted yet.\n\nWrite a clean As-Is.",
+  placeholder:"Step 1: Sample arrives at accessioning bench...",
+  reveal:"<ol><li>Sample arrives and is visually inspected by the technician.</li><li>Regardless of damage, technician logs status <b>Received</b> - no distinct damaged state exists.</li><li>If damage is visible, a physical sticky note is written, outside the system.</li><li>Sample proceeds toward testing in parallel with the workaround - no system control stops it.</li><li><b>Failure path (confirmed):</b> the note is lost, the sample is tested, an unexpected result surfaces days later and gets retroactively traced to the damage.</li><li>No audit trail exists for the damage observation or the eventual discovery - gap confirmed in Dublin and Madrid; Lisbon unconfirmed.</li></ol><p><b>What a strong As-Is does:</b> it names the failure path, not just the happy path - because that's exactly what your requirement has to close.</p>"
+},
+{ cat:"A . Intake & Discovery", id:"brd", label:"Writing the BRD", tag:"Day 1 - 16:00",
+  title:"Putting a Frame Around the Problem", sub:"Before code exists, this is the document stakeholders sign off on - and the one that saves you when scope creep shows up later.",
+  mentor:[
+   "Story-level requirements are for developers. Before that, you write a short <span class='term'>BRD</span> - Business Requirements Document - that a PM and stakeholders agree to: purpose, what's in, what's explicitly out, who's affected, how you'll know it worked.",
+   "Use everything from the last two stages. The \"out of scope\" line matters as much as the \"in scope\" one - it's what you point to later instead of relying on memory."
+  ],
+  task:"Write a compact BRD: Purpose / In-scope / Out-of-scope / Stakeholders / Success criteria, for the damaged sample alert.",
+  placeholder:"Purpose:\nIn scope:\nOut of scope:\nStakeholders:\nSuccess criteria:",
+  reveal:"<p><b>Purpose:</b> Replace the manual sticky-note workaround with a system-enforced damaged-sample flag, block, and audit trail.</p><p><b>In scope:</b> Accessioning intake flag, automatic block from testing, audit log entry, QC notification - Dublin, Madrid, Lisbon.</p><p><b>Out of scope:</b> Retroactive re-testing of historical samples; client-facing report template changes; instrument-level automatic damage detection (visual inspection stays manual).</p><p><b>Stakeholders:</b> Madrid QC lead (requester), Dublin & Lisbon QC leads, accessioning technicians (3 sites), IT support (notification monitoring), Product Manager.</p><p><b>Success criteria:</b> Zero damaged samples reach testing without an exception flag, for 30 consecutive days post-hypercare.</p><p><b>Why \"out of scope\" earns its place:</b> when someone later asks for instrument-level auto-detection, you point to this document instead of relitigating scope from memory.</p>"
+},
+{ cat:"A . Intake & Discovery", id:"raid", label:"Starting the RAID Log", tag:"Day 2 - 09:00",
+  title:"Risks, Assumptions, Issues, Dependencies", sub:"A living register, not a one-off note - this is what separates 'I think I mentioned that' from a defensible record.",
+  mentor:[
+   "Before this goes further, start the formal RAID log. Four buckets people constantly mix up: an <span class='term'>Assumption</span> is believed true but unconfirmed. A <span class='term'>Risk</span> is something that could go wrong. An <span class='term'>Issue</span> is already happening and blocking you now. A <span class='term'>Dependency</span> is something you rely on another team or system for.",
+   "Classify these four raw items correctly."
+  ],
+  task:"Classify each as Risk / Assumption / Issue / Dependency:\n1) Reason codes might not match across Lisbon (unconfirmed)\n2) Notification service historically flaky in Madrid\n3) Waiting on Lisbon QC lead's confirmation email\n4) Feature depends on the notification microservice team's retry logic shipping first",
+  placeholder:"1: ...\n2: ...\n3: ...\n4: ...",
+  reveal:"<table><tr><th>Item</th><th>Category</th><th>Why</th></tr><tr><td>Reason codes may not match in Lisbon</td><td><b>Assumption</b></td><td>Believed true, not yet confirmed</td></tr><tr><td>Notification service flaky in Madrid</td><td><b>Risk</b></td><td>Could cause missed alerts - hasn't happened on this feature yet</td></tr><tr><td>Waiting on Lisbon's confirmation</td><td><b>Issue</b> (borderline)</td><td>Already actively blocking you today</td></tr><tr><td>Depends on notification team's retry logic</td><td><b>Dependency</b></td><td>Another team's deliverable you rely on</td></tr></table><p>This log isn't paperwork - it's the thing you point to in Stage C4 when one of these actually materializes.</p>"
+},
+
+/* ---------- CATEGORY B: DEFINE THE BACKLOG ---------- */
+{ cat:"B . Define the Backlog", id:"epic", label:"Creating the Epic (Azure DevOps)", tag:"Day 2 - 11:00",
+  title:"Opening Azure DevOps for Real", sub:"Everything downstream hangs off this. Title and description need to survive someone reading it with zero context, six months from now.",
+  mentor:[
+   "Time to actually create the work item. Everything - Features, Stories - links up to this Epic. Write it so a stranger reading it cold understands the 'why', not just the 'what.'"
+  ],
+  task:"Write Epic fields: Title / Description / Business value statement / initial linked Features (names only).",
+  placeholder:"Title:\nDescription:\nBusiness value:\nFeatures:",
+  reveal:"<div class='code'><span class='kw'>Title:</span> Sample Exception Handling - Damaged Sample Intake\n<span class='kw'>Description:</span> Enable LIMS to formally capture, block, and audit damaged samples at accessioning across Dublin, Madrid, and Lisbon, replacing the current manual sticky-note workaround.\n<span class='kw'>Business value:</span> Eliminates undetected testing of damaged samples (data integrity / regulatory risk) and closes an audit trail gap flagged by Madrid QC.\n<span class='kw'>Linked Features:</span> Accessioning Exception Flagging . Exception Notification & Escalation . Exception Audit Trail</div><p><b>Why it matters:</b> an Epic without a business value line is just a folder. That line is what a PM later lifts straight into a steering committee deck (Stage F5) - write it for that reuse.</p>"
+},
+{ cat:"B . Define the Backlog", id:"features", label:"Epic to Feature to Story Breakdown", tag:"Day 2 - 11:30",
+  title:"Splitting the Epic Into Buildable Pieces", sub:"Feature = a deliverable slice within the Program Increment. Story = something a team can actually finish in one sprint.",
+  mentor:[
+   "Take the \"Accessioning Exception Flagging\" Feature and break it into 2-3 Stories. Rule of thumb: if a Story can't reasonably finish in one sprint, it's actually a Feature wearing a disguise."
+  ],
+  task:"Break Feature 'Accessioning Exception Flagging' into 2-3 sprint-sized Stories.",
+  placeholder:"Story 1: ...\nStory 2: ...\nStory 3: ...",
+  reveal:"<div class='code'><span class='kw'>Feature:</span> Accessioning Exception Flagging\n<span class='kw'>Story 1:</span> Add \"Damaged\" intake condition option at accessioning\n<span class='kw'>Story 2:</span> Enforce system block from testing queue when status = Exception-Damaged\n<span class='kw'>Story 3:</span> Persist reason code(s) on the exception record</div><p>Each one is independently testable and shippable - none depends on finishing the others first to demonstrate value, which is what makes them real Stories rather than a Feature split arbitrarily in three.</p>"
+},
+{ cat:"B . Define the Backlog", id:"story", label:"Writing the Story + Gherkin AC", tag:"Day 2 - 14:00",
+  title:"The Artifact Engineers Actually Build From", sub:"It has to survive contact with a developer who wasn't in the room for discovery.",
+  mentor:[
+   "Take Story 1 and 2 together and write one combined story with Gherkin acceptance criteria - Given/When/Then, unambiguous enough that a developer and a tester read it the same way.",
+   "Build in the audit trail requirement explicitly. In a regulated lab, if it isn't logged with who/when/what-changed, it didn't happen."
+  ],
+  task:"Write the user story (As a / I want / So that) plus Gherkin AC for: flag a sample damaged at accessioning, block it from testing, log it.",
+  placeholder:"As a Lab Accessioning Technician\nI want to...\nSo that...\n\nScenario: ...",
+  reveal:"<div class='code'><span class='kw'>Story:</span>\nAs a Lab Accessioning Technician\nI want to flag a sample as \"Exception - Damaged\" at intake\nSo that damaged samples are quarantined and cannot reach testing until reviewed\n\n<span class='kw'>Scenario:</span> Sample flagged as damaged at accessioning\n<span class='kw'>Given</span> a sample is being registered at accessioning\n<span class='kw'>And</span> the technician selects \"Damaged\" as the intake condition\n<span class='kw'>When</span> the sample record is saved\n<span class='kw'>Then</span> the system sets status to <span class='flag'>Exception - Damaged</span>\n<span class='kw'>And</span> the sample is blocked from the testing queue\n<span class='kw'>And</span> an audit entry is created with user, timestamp, and reason code\n<span class='kw'>And</span> the QC lead for the originating lab is notified</div><p>No UI description anywhere in here - you specified behavior, not layout, so it survives a redesign.</p>"
+},
+{ cat:"B . Define the Backlog", id:"estimation", label:"Estimation / Planning Poker", tag:"Day 2 - 15:30",
+  title:"Sizing the Work as a Team", sub:"The goal isn't consensus math - it's surfacing the hidden knowledge behind an outlier vote.",
+  mentor:[
+   "Team estimates in Fibonacci-ish points (1,2,3,5,8,13), voting simultaneously so nobody anchors on the first number said out loud.",
+   "Three stories just got voted. Decide the final estimate for each, and flag which one actually needs a discussion round."
+  ],
+  task:"Story 1 votes: 2,3,3,2,5. Story 2 votes: 8,5,13,8,8. Story 3 votes: 1,1,2,1,1. Give final estimates and note which needs discussion.",
+  placeholder:"Story 1: ...\nStory 2: ...\nStory 3: ...",
+  reveal:"<p><b>Story 1 to 3.</b> The lone 5 is a mild outlier; quick discussion, group converges down.</p><p><b>Story 2 - needs real discussion, don't average it.</b> Spread of 5 to 13 is wide - the 13-voter is seeing hidden complexity (very likely the notification-team dependency from the RAID log). Ask them to explain <i>first</i>, before anyone else re-votes.</p><p><b>Story 3 to 1.</b> Tight spread, converges instantly, move on.</p><p>The point of poker: a wide spread is information, not noise to be smoothed over.</p>"
+},
+{ cat:"B . Define the Backlog", id:"grooming", label:"Backlog Grooming & WSJF", tag:"Day 3 - 09:00",
+  title:"Where Does This Sit in the Queue?", sub:"A good story means nothing if it never gets prioritized. This is how a BA earns trust with a Product Manager.",
+  mentor:[
+   "Prioritize with a simplified <span class='term'>WSJF</span> (SAFe): (Business Value + Time Criticality + Risk Reduction) / Job Size. Higher score wins.",
+   "Rank these four, and be ready to defend the ranking out loud - whoever explains the number wins the argument, not whoever talks loudest."
+  ],
+  task:"Rank using (BV+TC+RR)/Size:\nA. Damaged-sample auto-flag - BV8 TC5 RR3 Size5\nB. Barcode label reprint button - BV3 TC2 RR1 Size2\nC. Multi-level result approval workflow - BV9 TC4 RR6 Size8\nD. Client report PDF branding update - BV4 TC1 RR1 Size3",
+  placeholder:"A: (8+5+3)/5 = ...\nFinal rank: ...",
+  reveal:"<table><tr><th>Item</th><th>Calc</th><th>Score</th></tr><tr><td>A</td><td>(8+5+3)/5</td><td><b>3.20</b></td></tr><tr><td>B</td><td>(3+2+1)/2</td><td><b>3.00</b></td></tr><tr><td>C</td><td>(9+4+6)/8</td><td><b>2.38</b></td></tr><tr><td>D</td><td>(4+1+1)/3</td><td><b>2.00</b></td></tr></table><p><b>Rank: A to B to C to D.</b> The interesting defense is A vs C: C has the highest raw value (9), but WSJF punishes the big job size on purpose - ship the smaller win now, get to C next.</p>"
+},
+
+/* ---------- CATEGORY C: SAFe EVENTS & CEREMONIES ---------- */
+{ cat:"C . SAFe Events & Ceremonies", id:"sprintplan", label:"Sprint Planning", tag:"Day 3 - 10:00",
+  title:"Committing to What Actually Fits", sub:"Priority order isn't the same as what fits. This is where velocity, buffer, and sprint goal come together.",
+  mentor:[
+   "Team velocity: 20 points per sprint. Never plan to 100% - leave headroom for unplanned interrupts (production support, edge cases like Stage D1)."
+  ],
+  task:"WSJF-ranked stories: 5, 8, 3, 8, 5 points. Velocity 20. Decide what's committed this sprint and write the sprint goal.",
+  placeholder:"Committed: ...\nSprint Goal: ...",
+  reveal:"<p><b>Committed:</b> 5 + 8 + 3 = 16 points. The next 8-point story would push to 24 - over capacity with zero buffer, so it rolls to next sprint rather than being squeezed in.</p><p><b>Sprint Goal:</b> \"By end of sprint, accessioning technicians in all three labs can flag a sample as damaged and have it automatically blocked from testing.\"</p><p>Leaving 4 points of headroom isn't slack - it's insurance against the interrupt that always shows up mid-sprint.</p>"
+},
+{ cat:"C . SAFe Events & Ceremonies", id:"piplanning", label:"PI Planning", tag:"Program Increment - Day 1-2",
+  title:"The Whole Train, One Room, Two Days", sub:"SAFe's quarterly event: every team on the Agile Release Train plans the next 10-12 weeks together, out loud, with dependencies and risks on the table.",
+  mentor:[
+   "Vision and context come from leadership; teams draft their own plan; cross-team dependencies get mapped on a shared program board; risks get sorted with <span class='term'>ROAM</span> - Resolved, Owned, Accepted, Mitigated; and the event closes with a <span class='term'>confidence vote</span>, teams fist-voting 1-5 on their own plan. Anything under 3 gets addressed on the spot, not quietly waved through.",
+   "Draft your team's contribution."
+  ],
+  task:"Write 2 PI Objectives (with a business value 1-10 each), one cross-team dependency, and classify one risk using ROAM.",
+  placeholder:"Objective 1: ...\nObjective 2: ...\nDependency: ...\nRisk (ROAM): ...",
+  reveal:"<div class='code'><span class='kw'>PI Objective 1</span> (BV9): Deliver end-to-end damaged sample exception handling across Dublin, Madrid, Lisbon.\n<span class='kw'>PI Objective 2</span> (BV6): Establish a standardized reason-code list shared across all three sites.\n\n<span class='kw'>Dependency:</span> Notification Platform team must ship reliable retry/dead-letter handling before Objective 1 can go fully live - logged on the program board as cross-team.\n\n<span class='kw'>Risk (ROAM):</span> \"Lisbon may use a different local reason-code vocabulary\" - classified <span class='flag'>Owned</span> - assigned to you, the BA, to resolve via a discovery workshop before Sprint 1 ends. Not left as Accepted, because it's cheap to resolve now and expensive to discover later.</div><p>The confidence vote matters as much as the plan itself: a team that fist-votes a 2 and gets waved through anyway is the plan that quietly fails in week 6.</p>"
+},
+{ cat:"C . SAFe Events & Ceremonies", id:"standup", label:"Daily Stand-up", tag:"Day 3 - 09:15",
+  title:"Your First Stand-up", sub:"Fifteen seconds too long and you've lost the room. A discipline, not a status meeting.",
+  mentor:[
+   "Format: yesterday / today / blocker - for the team, not a report for the PM (that's Stage F4). You're blocked on Lisbon confirming the reason-code assumption from your RAID log."
+  ],
+  task:"Write your stand-up update in roughly 3 sentences: yesterday / today / blocker.",
+  placeholder:"Yesterday I... Today I... I'm blocked on...",
+  reveal:"<p style='font-style:italic'>\"Yesterday I finalized the Gherkin AC and walked it with the Dublin dev lead - no open questions there. Today I'm chasing Lisbon to confirm whether their damage reason codes match Dublin and Madrid's, since the story assumes one shared list. I'm blocked on closing this story as ready until that's confirmed - messaged their QC lead this morning, will escalate through the PM if no answer by tomorrow.\"</p><p><b>Why it lands:</b> the blocker comes with a plan attached, not just a complaint - nobody needs to chase you on it.</p>"
+},
+{ cat:"C . SAFe Events & Ceremonies", id:"midpi", label:"Mid-PI Backlog Refinement", tag:"PI - Week 4",
+  title:"When a Logged Risk Becomes Real", sub:"Ongoing refinement keeps the backlog ready 1-2 sprints ahead - and closes the loop on things you flagged earlier.",
+  mentor:[
+   "The Lisbon vocabulary risk from PI Planning just materialized: their reason codes genuinely don't match Dublin/Madrid. Write the new backlog item this creates."
+  ],
+  task:"Write the new Story that emerges now that the Lisbon reason-code risk has been confirmed as real.",
+  placeholder:"Story: ...",
+  reveal:"<div class='code'><span class='kw'>Story:</span> As a System, I want to map Lisbon-specific reason codes to the standardized list, so that exception records remain consistent across all three sites.</div><p>This moves the item from Risk (ROAM: Owned) in your PI plan to a committed, estimated backlog entry - the loop from Stage C2 closes here, on paper, not just in conversation.</p>"
+},
+{ cat:"C . SAFe Events & Ceremonies", id:"demo", label:"Sprint Review / Demo", tag:"Day 10 - Sprint End",
+  title:"Show, Don't Slide", sub:"Working software, live, in front of the people who asked for it - not a slide deck walkthrough.",
+  mentor:[
+   "The Madrid QC lead and the PM are in the room. Show what you committed to, live, and let the real user drive it themselves if they're willing - their reaction matters more than your narration."
+  ],
+  task:"Write your 3-sentence opening for the demo of the damaged-sample story.",
+  placeholder:"This sprint we committed to...",
+  reveal:"<p style='font-style:italic'>\"This sprint we committed to letting accessioning flag a sample as damaged and blocking it from testing - I'll show it live rather than walk you through slides. [demo] Before we close, I'd like you to try flagging one yourself if you're comfortable - your reaction as the actual user tells us more than mine will.\"</p><p>Handing over the keyboard surfaces real usability issues on the spot, instead of three weeks later in a support ticket.</p>"
+},
+{ cat:"C . SAFe Events & Ceremonies", id:"retro", label:"Retrospective", tag:"Day 10 - 16:00",
+  title:"Start / Stop / Continue", sub:"An action item without an owner and a date is a complaint, not a retro outcome.",
+  mentor:[
+   "Safe space, no blame. This sprint: DEF-114 was found late in UAT, and Lisbon's confirmation came in a day behind schedule."
+  ],
+  task:"Write one Start, one Stop, one Continue - give at least one an owner and a date.",
+  placeholder:"Start: ...\nStop: ...\nContinue: ...",
+  reveal:"<p><b>Start:</b> Confirm cross-site reference data (like reason codes) during discovery, not mid-sprint. Owner: BA, effective next PI.</p><p><b>Stop:</b> Relying on a single Slack DM to confirm cross-site assumptions - no paper trail if it's forgotten.</p><p><b>Continue:</b> Developers pinging the BA directly on ambiguous edge cases mid-sprint instead of guessing - this worked well in Stage 6, keep it.</p>"
+},
+
+/* ---------- CATEGORY D: DELIVERY SUPPORT ---------- */
+{ cat:"D . Delivery Support", id:"devsupport", label:"Dev Support & Edge Case Triage", tag:"Day 4 - 11:30",
+  title:"The Edge Case Nobody Wrote Down", sub:"This is where your requirement meets reality - and where vague specs get exposed.",
+  mentor:[
+   "A developer pings you: \"What if a sample has TWO damage reasons at once? One record or two? And what happens if the notification service is down when we try to alert the QC lead - do we just drop it?\" Normal, not a failure - it's why a BA stays engaged through the sprint.",
+   "The second question is exactly what a <span class='term'>dead-letter queue</span> solves: after a few failed delivery retries, the message routes to a holding queue instead of vanishing, so a human can investigate."
+  ],
+  task:"Reply to the developer resolving both questions with a clear business rule for each.",
+  placeholder:"On multiple damage reasons: ...\nOn notification failure: ...",
+  reveal:"<p><b>Multiple reasons:</b> one exception record per sample, reason codes stored as a list, not multiple records. Status stays a single <span class='flag'>Exception - Damaged</span> regardless of how many reasons apply.</p><p><b>Notification failure:</b> nothing silently drops. Failed sends retry a fixed number of times (3, short backoff); after that, route to a dead-letter queue and alert IT support. The sample stays blocked from testing regardless of whether the alert fired - the block is a data-status rule, not dependent on the notification succeeding.</p>"
+},
+{ cat:"D . Delivery Support", id:"changerequest", label:"Handling a Scope Change", tag:"Day 6 - Mid-Sprint",
+  title:"Can We Also Add...", sub:"Assessing impact before saying yes is the whole job here - not approving or refusing on the spot.",
+  mentor:[
+   "Madrid now also wants damaged-sample alerts auto-emailed to a shared distribution list, not just the QC lead. New ask, mid-sprint. Don't just fold it into the current commitment."
+  ],
+  task:"Write the impact assessment for this request: is it in-scope for the current sprint, and who decides?",
+  placeholder:"Impact assessment: ...",
+  reveal:"<p>This is new scope, not a clarification of the existing story. Recommend logging it as a new backlog item under the \"Exception Notification & Escalation\" Feature, not expanding the current sprint's committed story. Estimated effort is small, but it needs IT Security input on what addresses belong on a shared distro list before it's ready. Recommend bringing it to the next grooming session for WSJF scoring rather than silently absorbing it - that protects the sprint commitment the team already confidence-voted on in PI Planning.</p>"
+},
+{ cat:"D . Delivery Support", id:"dependency", label:"Cross-Team Dependency Mapping", tag:"Day 6 - 14:00",
+  title:"You Don't Own the Whole Picture", sub:"A LIMS BA rarely owns everything the feature touches. Naming who owns what, and by when, prevents 'we assumed someone else had it.'",
+  mentor:[
+   "This feature touches three teams beyond your own: Notification Platform (retry/dead-letter infra), IT Security (audit log immutability rules), and your own LIMS core team."
+  ],
+  task:"Build a dependency table: Dependency / Owning team / What you need / By when.",
+  placeholder:"Dependency | Owner | Need | By when",
+  reveal:"<table><tr><th>Dependency</th><th>Owning Team</th><th>What you need</th><th>By when</th></tr><tr><td>Reliable retry/dead-letter delivery</td><td>Notification Platform</td><td>Confirmed SLA on retry attempts</td><td>Before Sprint 2 start</td></tr><tr><td>Audit log immutability rules</td><td>IT Security</td><td>Sign-off that entries can't be edited/deleted</td><td>Before UAT sign-off</td></tr><tr><td>Accessioning UI changes</td><td>LIMS Core (your team)</td><td>-</td><td>In progress</td></tr></table><p>Naming the owner and the date is what prevents the failure mode where everyone assumed someone else was handling it.</p>"
+},
+{ cat:"D . Delivery Support", id:"instrument", label:"Vendor / Instrument Integration Spec", tag:"Adjacent Project - Day 7",
+  title:"When a Physical Instrument Feeds LIMS", sub:"A different, very common BA activity: specifying how a lab analyzer's results land in the system.",
+  mentor:[
+   "Not this feature, but a bread-and-butter BA task you'll do often: a hematology analyzer needs to post results into LIMS. Write the integration requirement - same 'never silently drop data' principle as the dead-letter queue conversation, new context."
+  ],
+  task:"Write a short integration requirement: what fields the instrument posts, and what happens if a result can't be matched to an accessioned sample.",
+  placeholder:"Fields posted: ...\nOn mismatch: ...",
+  reveal:"<p><b>Fields posted:</b> sample ID, test code, result value, unit, timestamp, instrument ID.</p><p><b>On mismatch:</b> if the sample ID doesn't match an accessioned sample in LIMS, the result is held in an exception queue rather than discarded, and the lab tech is alerted to reconcile it manually.</p><p>Same principle as Stage D1's dead-letter queue, applied one layer earlier in the pipeline - recognizing that pattern is what makes cross-project experience actually compound.</p>"
+},
+
+/* ---------- CATEGORY E: QUALITY, COMPLIANCE & UAT ---------- */
+{ cat:"E . Quality, Compliance & UAT", id:"uat", label:"UAT Test Cases & Defect Logging", tag:"Day 8 - Sprint End",
+  title:"Proving It Actually Works", sub:"Your qTest/ALM instincts map directly here - same discipline, new domain vocabulary.",
+  mentor:[
+   "This is where TD SYNNEX experience stops being a bridge and becomes literally the same job. One vocabulary note: when a result falls outside expected range here, it's called <span class='term'>OOS/OOT</span> - Out of Spec / Out of Trend."
+  ],
+  task:"Write 3 test cases (happy path / damaged flag / audit trail check) and 1 defect report (severity, steps, expected vs actual).",
+  placeholder:"TC1: ...\nTC2: ...\nTC3: ...\nDefect: ...",
+  reveal:"<table><tr><th>ID</th><th>Case</th><th>Expected</th></tr><tr><td>TC-01</td><td>Register undamaged sample</td><td>Status = Received; proceeds normally</td></tr><tr><td>TC-02</td><td>Register sample marked Damaged</td><td>Status = Exception-Damaged; blocked; QC lead notified</td></tr><tr><td>TC-03</td><td>Inspect audit log after TC-02</td><td>Entry with user, timestamp, reason code(s); immutable</td></tr></table><div class='code'><span class='kw'>Defect DEF-114</span> | Severity: <span class='flag'>High</span>\nSteps: Flag a sample with two reason codes at accessioning.\nExpected: Both codes appear on notification and audit entry.\nActual: Only the first code is captured - second silently dropped.\nImpact: Undercounts damage causes in the audit trail; regulatory traceability risk.</div>"
+},
+{ cat:"E . Quality, Compliance & UAT", id:"traceability", label:"Traceability Matrix", tag:"Day 9 - 10:00",
+  title:"Proving Coverage to an Auditor", sub:"Links each requirement to its tests and to the compliance clause it satisfies - can't be improvised after the fact.",
+  mentor:[
+   "Build the matrix connecting your Stage B3 story to your Stage E1 test cases and the ISO 15189 / ALCOA+ principle each one supports."
+  ],
+  task:"Build: Requirement ID to Test Case IDs to Regulatory reference.",
+  placeholder:"REQ-EXC-01 -> ... -> ...",
+  reveal:"<table><tr><th>Requirement</th><th>Test Cases</th><th>Reg. Reference</th></tr><tr><td>REQ-EXC-01 (damaged sample flag)</td><td>TC-01, TC-02, TC-03</td><td>ISO 15189 nonconforming-sample handling; ALCOA+ Attributable (who flagged) & Contemporaneous (timestamp)</td></tr></table><p>In a real audit, this is the document you hand the inspector - you can't reconstruct it from memory in the room.</p>"
+},
+{ cat:"E . Quality, Compliance & UAT", id:"gonogo", label:"UAT Sign-off / Go-No-Go", tag:"Day 9 - 15:00",
+  title:"A Decision Meeting, Not a Status Update", sub:"Assemble the evidence, get explicit sign-off, make risk acceptance conscious and documented.",
+  mentor:[
+   "All P1/High defects are closed. Two Low-severity cosmetic defects (label alignment) remain open. Write your recommendation."
+  ],
+  task:"Write the Go/No-Go recommendation for this sign-off meeting.",
+  placeholder:"Recommendation: ...",
+  reveal:"<p><b>Recommend GO.</b> The two open Low-severity defects (label alignment) are cosmetic, not risks to data integrity or usability - log them for the next sprint post-launch and get that explicitly noted in the sign-off minutes. The point is that it becomes a documented, conscious accepted risk, not something quietly missed and rediscovered later.</p>"
+},
+{ cat:"E . Quality, Compliance & UAT", id:"audit", label:"Mock Regulatory Audit Walkthrough", tag:"Simulated - ISO 15189",
+  title:"Show Me What Happens, End to End", sub:"An auditor asks you to walk a nonconforming sample through the system live. This is what that looks like.",
+  mentor:[
+   "Real inspections do exactly this. Prepare the walkthrough now, calmly, before someone in a suit is standing over your shoulder asking for it."
+  ],
+  task:"Write the step-by-step walkthrough you'd show an auditor: what happens when a sample arrives damaged, end to end, including who can see it and when.",
+  placeholder:"1. ...\n2. ...",
+  reveal:"<ol><li>Show the accessioning screen and the damaged intake flag selection.</li><li>Save - show the system-enforced block from the testing queue.</li><li>Show the audit log entry: user, timestamp, reason code, marked immutable.</li><li>Show the notification sent to the QC lead.</li><li>Show the QC lead's review/resolution action also being logged - a second, separate entry.</li></ol><p><b>Key point to make out loud to the auditor:</b> the technician who flags the sample cannot also clear the exception - that's a deliberate <span class='term'>segregation of duties</span> control, not an oversight.</p>"
+},
+
+/* ---------- CATEGORY F: RELEASE, SUPPORT & REPORTING ---------- */
+{ cat:"F . Release, Support & Reporting", id:"runbook", label:"Go-Live Cutover Runbook", tag:"Release Day minus 1",
+  title:"The Plan for the Actual Release Day", sub:"Pre-checks, deployment order, rollback trigger, who's on call - written before anyone's under pressure.",
+  mentor:[
+   "Write the runbook now, calmly, not at 7am on release day."
+  ],
+  task:"Outline: pre go-live checks / deployment steps / rollback trigger + action / comms plan / on-call owner.",
+  placeholder:"Pre-checks: ...\nDeployment: ...\nRollback trigger: ...\nComms: ...\nOn-call: ...",
+  reveal:"<p><b>Pre-checks:</b> UAT sign-off confirmed at all 3 sites; current config backed up; comms sent to accessioning staff the day before.</p><p><b>Deployment:</b> release the notification service update first, then the LIMS accessioning module; verify with a test-mode smoke sample.</p><p><b>Rollback trigger:</b> if audit log entries fail to write for more than a few minutes, or the block logic fails to trigger - roll back the LIMS module immediately.</p><p><b>Comms:</b> single email to all 3 site leads at go-live confirmation, and again immediately if a rollback happens.</p><p><b>On-call:</b> BA and dev lead reachable for the first 4 hours post go-live.</p>"
+},
+{ cat:"F . Release, Support & Reporting", id:"hypercare", label:"Hypercare", tag:"Week 3 - Post Release",
+  title:"It Shipped. Now You Watch It.", sub:"Go-live isn't the finish line. This is where you prove the requirement held up in production.",
+  mentor:[
+   "Everyone wants to declare victory the moment it ships. Your job is to define, in writing, before go-live, what 'stable enough to stop watching' actually means - so nobody argues based on vibes later."
+  ],
+  task:"Write the hypercare exit criteria checklist.",
+  placeholder:"1. No open P1/P2 defects for...\n2. ...",
+  reveal:"<ul><li>No open High/P1 defects related to the feature for a defined window (5-10 business days) across all three sites.</li><li>Defect trend flat or declining - one quiet day isn't enough evidence.</li><li>Accessioning staff at all 3 sites have used the flag in real intake without hand-holding.</li><li>Audit log entries spot-checked by QC leads at all three sites, confirmed complete.</li><li>Notification delivery, including the retry/dead-letter path, observed working at least once in production.</li><li>Handover note exists so normal support - not just you - can pick up future tickets.</li><li>Sign-off collected from <b>all three</b> site QC leads, not just Madrid where the request originated.</li></ul>"
+},
+{ cat:"F . Release, Support & Reporting", id:"incident", label:"Production Incident Triage", tag:"Week 6 - Post-Hypercare",
+  title:"The Bug That Shows Up Weeks Later", sub:"Hypercare closed. Now a real live issue surfaces. This is triage under mild pressure.",
+  mentor:[
+   "Lisbon's QC lead reports she hasn't received any exception notifications in 3 days - Dublin and Madrid are fine. Triage it."
+  ],
+  task:"Write your triage steps and immediate stakeholder communication.",
+  placeholder:"Triage:\nComms:",
+  reveal:"<p><b>Triage:</b> scope confirms Lisbon-only, which points to a Lisbon-specific config issue, not a global regression. Check the dead-letter queue first for stuck Lisbon messages (the exact mechanism built in Stage D1). Also check whether the Lisbon reason-code mapping shipped in Stage C4 quietly broke Lisbon-specific routing.</p><p><b>Comms to Lisbon:</b> acknowledge immediately, give an ETA, and explicitly separate the two facts - confirm damaged samples are <i>still being correctly blocked</i> from testing even though the notification is failing. That distinction, decided back in Stage D1 (block does not depend on the alert firing), is exactly what keeps this a notification bug instead of a data-integrity incident.</p>"
+},
+{ cat:"F . Release, Support & Reporting", id:"pmreport", label:"Weekly PM Status Report", tag:"Friday, 16:00",
+  title:"Writing Up the Week", sub:"A synthesis for the PM, not a stand-up transcript.",
+  mentor:[
+   "Structure: overall status (Green/Amber/Red), done this week, next week, risks/blockers, decisions needed. This is the artifact that protects you if something slips, because it shows you flagged the risk before it became a fire."
+  ],
+  task:"Turn this week's facts into a status report: story shipped to all 3 sites, one High defect found and fixed in UAT, hypercare started, Lisbon confirmation came one day late but didn't block the sprint.",
+  placeholder:"Status:\nThis week:\nNext week:\nRisks:\nNeed from you:",
+  reveal:"<div class='code'><span class='kw'>Damaged Sample Intake Alert - Status:</span> <span class='flag'>GREEN</span>\n\n<span class='kw'>This week:</span> Built and deployed to all three sites. One High-severity defect (multi-reason-code capture) found in UAT and fixed before release.\n<span class='kw'>Next week:</span> In hypercare - monitoring defect trend and notification delivery across all sites through Friday.\n<span class='kw'>Risks:</span> Lisbon confirmed shared reason codes one day later than planned; didn't block the sprint, but worth watching on future multi-site stories.\n<span class='kw'>Need from you:</span> Nothing blocking.</div><p><b>Why Green, not Amber:</b> the delay cost nothing real - it's reported as a pattern to watch. Calling Amber when nothing is currently at risk trains a PM to discount your Amber calls later.</p>"
+},
+{ cat:"F . Release, Support & Reporting", id:"steering", label:"Steering Committee Summary", tag:"Quarterly Review",
+  title:"A Completely Different Altitude", sub:"Exec audience cares about program-level outcome and risk posture - not sprint numbers or defect IDs.",
+  mentor:[
+   "This Epic is one line among several in a quarterly steering deck. Write it at the right altitude."
+  ],
+  task:"Write a 3-bullet steering committee update on this Epic.",
+  placeholder:"- ...\n- ...\n- ...",
+  reveal:"<p>- Sample Exception Handling delivered on schedule across all 3 sites.</p><p>- Zero data-integrity incidents in the first 30 days post go-live.</p><p>- Removed the manual sticky-note workaround, directly supporting the Q3 audit-readiness goal.</p><p>Notice: no WSJF scores, no defect IDs, no sprint numbers. This audience wants outcome and risk posture, not delivery mechanics.</p>"
+},
+{ cat:"F . Release, Support & Reporting", id:"training", label:"End-User Job Aid", tag:"Post Go-Live",
+  title:"The One-Pager Nobody Else Will Write", sub:"Quick reference for accessioning techs - not a training deck, a job aid they'll actually keep taped to a monitor.",
+  mentor:[
+   "Write it in second person, action-first, zero jargon - the accessioning tech doesn't care what a dead-letter queue is."
+  ],
+  task:"Write a 4-5 bullet job aid: what to do when a sample is damaged, now that the feature is live.",
+  placeholder:"1. ...\n2. ...",
+  reveal:"<ol><li>Select \"Damaged\" as the intake condition when logging the sample.</li><li>Choose every reason code that applies.</li><li>The system automatically blocks it from testing - you don't need to do anything else.</li><li>The QC lead is notified automatically.</li><li>If you don't see an on-screen confirmation, check with IT before proceeding manually.</li></ol>"
+}
+];
+
+/* ================= STATE / STORAGE ================= */
+let current = 0;
+let stateCache = {};
+
+async function loadState(){
+  for(const s of STAGES){
+    try{
+      const r = await window.storage.get('stage:'+s.id, false);
+      stateCache[s.id] = r ? JSON.parse(r.value) : {answer:"", done:false, revealed:false};
+    }catch(e){
+      stateCache[s.id] = {answer:"", done:false, revealed:false};
+    }
+  }
+}
+async function saveState(id){
+  try{ await window.storage.set('stage:'+id, JSON.stringify(stateCache[id]), false); }catch(e){}
+}
+
+/* ================= RENDER ================= */
+function renderSidebar(){
+  const list = document.getElementById('stageList');
+  list.innerHTML = "";
+  let lastCat = null;
+  STAGES.forEach((s, i)=>{
+    if(s.cat !== lastCat){
+      const head = document.createElement('div');
+      head.className = 'cat-head';
+      head.textContent = s.cat;
+      list.appendChild(head);
+      lastCat = s.cat;
+    }
+    const btn = document.createElement('button');
+    btn.className = 'stage-btn' + (i===current ? ' active':'');
+    const done = stateCache[s.id] && stateCache[s.id].done;
+    btn.innerHTML = '<span class="stage-num">'+String(i+1).padStart(2,'0')+'</span><span class="stage-label">'+s.label+'</span><span class="stage-check '+(done?'done':'')+'">&#10003;</span>';
+    btn.onclick = ()=>{ current = i; renderAll(); };
+    list.appendChild(btn);
+  });
+  const doneCount = STAGES.filter(s=>stateCache[s.id] && stateCache[s.id].done).length;
+  document.getElementById('progressFill').style.width = (doneCount/STAGES.length*100)+'%';
+  document.getElementById('progressText').textContent = doneCount + ' / ' + STAGES.length + ' stages complete';
+}
+
+function renderMain(){
+  const s = STAGES[current];
+  const st = stateCache[s.id];
+  const main = document.getElementById('main');
+  main.innerHTML =
+    '<div class="cat-pill">'+s.cat+'</div>'+
+    '<div class="label-card"><span class="tab-notch">'+String(current+1).padStart(2,'0')+'</span>'+s.tag+'</div>'+
+    '<h2 class="stage-title">'+s.title+'</h2>'+
+    '<p class="stage-sub">'+s.sub+'</p>'+
+    (st.done ? '<div class="status-stamp">&#10003; STAGE SIGNED OFF</div>' : '') +
+    '<div class="mentor"><div class="who">Your Trainer</div>'+ s.mentor.map(p=>'<p>'+p+'</p>').join('') +'</div>'+
+    '<div class="panel-card"><h3>Your Task</h3>'+
+    '<div class="note-block">'+s.task+'</div>'+
+    '<textarea id="answerBox" placeholder="'+s.placeholder.replace(/"/g,'&quot;')+'">'+(st.answer||'')+'</textarea>'+
+    '<div class="btn-row">'+
+    '<button class="act primary" id="revealBtn">Reveal Trainer&rsquo;s Model Answer</button>'+
+    '<button class="act done-btn" id="doneBtn">'+(st.done ? 'Marked Complete' : 'Mark Stage Complete')+'</button>'+
+    '</div>'+
+    '<div class="reveal '+(st.revealed?'show':'')+'" id="revealBlock">'+
+    '<div class="who">What A Strong Answer Looks Like</div>'+
+    '<div class="reveal-body">'+s.reveal+'</div></div>'+
+    '</div>'+
+    '<div class="nav-foot">'+
+    '<button class="act" id="prevBtn" '+(current===0?'disabled style="opacity:.35"':'')+'>Previous Stage</button>'+
+    '<button class="act" id="nextBtn" '+(current===STAGES.length-1?'disabled style="opacity:.35"':'')+'>Next Stage</button>'+
+    '</div>';
+
+  const box = document.getElementById('answerBox');
+  box.addEventListener('input', ()=>{
+    st.answer = box.value;
+    saveState(s.id);
+  });
+  document.getElementById('revealBtn').onclick = ()=>{
+    st.revealed = true;
+    document.getElementById('revealBlock').classList.add('show');
+    saveState(s.id);
+  };
+  document.getElementById('doneBtn').onclick = ()=>{
+    st.done = !st.done;
+    saveState(s.id);
+    renderAll();
+  };
+  document.getElementById('prevBtn').onclick = ()=>{ if(current>0){ current--; renderAll(); } };
+  document.getElementById('nextBtn').onclick = ()=>{ if(current<STAGES.length-1){ current++; renderAll(); } };
+}
+
+function renderAll(){ renderSidebar(); renderMain(); }
+
+document.getElementById('resetBtn').onclick = async ()=>{
+  if(!confirm("Reset all progress and saved answers? This can't be undone.")) return;
+  for(const s of STAGES){
+    stateCache[s.id] = {answer:"", done:false, revealed:false};
+    await saveState(s.id);
+  }
+  current = 0;
+  renderAll();
+};
+
+(async function init(){
+  await loadState();
+  renderAll();
+})();
+</script>
+</body>
+</html>
