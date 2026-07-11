@@ -1,10 +1,21 @@
-# Business Requirements Document
-### Damaged Sample Intake Alert
+# Damaged Sample Intake Alert — Business Requirements Document
 
-**Ticket:** #1
-**Prepared by:** Max Ramos
-**Team:** Eurofins IT Business Analysis
-**Status:** Cleared to proceed to solution scoping (PM sign-off: Phyllis Coyle)
+**Ticket:** #1 · **Prepared by:** Max Ramos · **Team:** Eurofins IT Business Analysis
+**Status:** :white_check_mark: Cleared to proceed to solution scoping (PM sign-off: Phyllis Coyle)
+
+---
+
+## Table of Contents
+- [1. Purpose](#1-purpose)
+- [2. Background](#2-background)
+- [3. Current State by Site](#3-current-state-by-site)
+- [4. Key Findings](#4-key-findings)
+- [5. Scope](#5-scope)
+- [6. Stakeholders](#6-stakeholders)
+- [7. Interim Mitigation](#7-interim-mitigation-in-effect-now)
+- [8. Success Criteria](#8-success-criteria)
+- [9. Open Questions for Engineering](#9-open-questions-for-engineering)
+- [10. Approval](#10-approval)
 
 ---
 
@@ -21,17 +32,17 @@ Ticket #1 was raised by the Madrid QC Lead reporting that damaged samples were n
 ### Madrid
 Damaged sample flagged with a physical sticky note attached to the sample. Sample remains in the normal testing queue with no physical separation. No system status differentiates a damaged sample from a normal one.
 
-> **Confirmed failure:** sticky note missed, sample tested, out-of-range result surfaced approximately two days later and was traced back.
+> :warning: **Confirmed failure:** sticky note missed, sample tested, out-of-range result surfaced approximately two days later and was traced back.
 
 ### Dublin
 Damaged sample physically moved to a dedicated rejection bin, separate from the normal queue. Sample ID recorded on a shared whiteboard. QC review required before the sample can leave the bin. No system status differentiates a damaged sample from a normal one.
 
-> **Confirmed failure:** whiteboard wiped at end of week before review occurred; sample was mistakenly returned to the queue.
+> :warning: **Confirmed failure:** whiteboard wiped at end of week before review occurred; sample was mistakenly returned to the queue.
 
 ### Lisbon
 Damaged sample is not registered into LIMS until a shift supervisor makes an accept/reject decision on the spot. Rejected samples are logged in a paper reject book. No system record exists during the decision window.
 
-> **Confirmed gap:** if the supervisor check is skipped, the sample can be registered and tested normally with no hard stop preventing it.
+> :warning: **Confirmed gap:** if the supervisor check is skipped, the sample can be registered and tested normally with no hard stop preventing it.
 
 ## 4. Key Findings
 
@@ -47,15 +58,15 @@ No site formally tracks how often this occurs. The only figure available (approx
 ## 5. Scope
 
 **In scope:**
-- System-enforced flag for a damaged sample at intake, across all three sites
-- Automatic block from the testing queue once flagged
-- Audit trail entry for every flag, and for every override/clearance
-- Notification to the relevant site's QC Lead
+- [x] System-enforced flag for a damaged sample at intake, across all three sites
+- [x] Automatic block from the testing queue once flagged
+- [x] Audit trail entry for every flag, and for every override/clearance
+- [x] Notification to the relevant site's QC Lead
 
 **Out of scope (for this phase):**
-- A standardized cross-site definition of damage severity (parked for future discussion)
-- Automated frequency/trend reporting dashboards
-- Retroactive review of historical samples
+- [ ] A standardized cross-site definition of damage severity (parked for future discussion)
+- [ ] Automated frequency/trend reporting dashboards
+- [ ] Retroactive review of historical samples
 
 ## 6. Stakeholders
 
@@ -87,4 +98,5 @@ Zero damaged samples reach testing without a system-recorded exception, for 30 c
 Reviewed and cleared to proceed to solution scoping with architecture/engineering, per Product Manager sign-off (Phyllis Coyle).
 
 ---
+
 *Related: Ticket #1 · Meeting minutes — Cross-Site Discovery Discussion*
